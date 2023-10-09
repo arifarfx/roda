@@ -6,24 +6,20 @@ function getJsonData(url) {
             if (xhr.status === 200) {
                 resolve(JSON.parse(xhr.responseText));
             } else {
-                reject({
-                    status: xhr.status,
-                    statusText: xhr.statusText
-                });
+                reject(new Error(xhr.statusText));
             }
         };
         xhr.onerror = function() {
-            reject({
-                status: xhr.status,
-                statusText: xhr.statusText
-            });
+            reject(new Error(xhr.statusText));
         };
         xhr.send();
     });
 }
 
-getJsonData("https://clubmagneto.com/wp-content/plugins/gamiwheel/inc/jsongen.php")
+// Contoh penggunaan promise:
+getJsonData("https://clubmagneto.com/wp-content/plugins/gamiwheel/inc/applixir.json")
     .then(jsonData => {
+         // Periksa kata-kata dalam jsonData.
         if (jsonData && jsonData.hasOwnProperty("zoneid")) {
             var options = {
                 zoneId: jsonData.zoneid,
@@ -33,18 +29,27 @@ getJsonData("https://clubmagneto.com/wp-content/plugins/gamiwheel/inc/jsongen.ph
                 custom: "Video Rewards",
                 adStatusCb: adStatusCallback,
             };
+
             invokeApplixirVideoUnit(options);
-            var status = adStatusCallback();
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "https://clubmagneto.com/wp-content/plugins/gamiwheel/inc/vidrewards.php", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.send(JSON.stringify({
-                status: status,
-            }));
+
+            // Kita perlu memanggil adStatusCallback sebagai promise, asumsikan ia adalah fungsi async.
+            adStatusCallback()
+                .then(status => {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "https://clubmagneto.com/wp-content/plugins/gamiwheel/inc/vidrewards.php", true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.send(JSON.stringify({
+                        status: status,
+                    }));
+                })
+                .catch(error => {
+                    console.error("Failed to get status: ", error);
+                });
         } else {
             alert("Kesalahan: Data JSON tidak valid");
         }
+
     })
     .catch(error => {
-        alert("Kesalahan: " + error.statusText);
+        console.error("Failed to get json data: ", error);
     });
