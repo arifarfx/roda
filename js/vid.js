@@ -12,7 +12,7 @@ function getJsonData(url) {
 }
 
 // Dapatkan data JSON
-var jsonData = getJsonData("https://clubmagneto.com/wp-content/plugins/gamiwheel/inc/applixir.json");
+var jsonData = getJsonData("https://clubmagneto.com/wp-content/plugins/gamiwheel/inc/jsongen.php");
 
 // Periksa apakah variabel jsonData terdefinisi dan memiliki properti zoneid
 if (jsonData && jsonData.hasOwnProperty("zoneid")) {
